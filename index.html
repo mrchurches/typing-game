@@ -1,0 +1,315 @@
+<title>Typing Game</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --green: #1b8f21;
+    --yellow: #faa916;
+    --red: #96031a;
+    --black: #222;
+    --gray: #999;
+  }
+
+  header{
+    color: white;
+    padding: 10px;
+    text-align: center;
+  }
+
+  section {
+    position: relative;
+    font-family: Menlo, monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 30px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  input {
+    z-index: 999;
+    position: absolute;
+    top: -30;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 8px;
+  }
+
+  time {
+    color: var(--yellow);
+  }
+
+  x-letter {
+    color: var(--gray);
+    position: relative;
+    &.active::before {
+      content: "|";
+      color: var(--yellow);
+      position: absolute;
+      left: -6;
+      animation: 1s blink infinite ease-in-out;
+    }
+    &.active.is-last::before{
+      left:65%;
+    }
+    &.correct {
+      color: var(--green);
+    }
+    &.incorrect {
+      color: var(--red);
+    }
+  }
+
+  x-word {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.4s ease-in-out;
+    &.marked{
+      border-bottom: 2px solid var(--red);
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  #game{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+  #results {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h2{
+    color: var(--yellow);
+    margin:0;
+    padding:0;
+  }
+
+  h3{
+    color: var(--gray);
+    font-size: 3rem;
+    margin:0;
+    padding:0;
+  }
+
+  button{
+    display: flex;
+    background: var(--gray);
+    width: 5rem;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    padding: 1rem;
+    margin: 1rem;
+    transition: background 0.2s ease-in-out;
+
+    &:hover{
+      background: var(--yellow);
+    }
+  }
+</style>
+
+<body>
+  <header>
+    <h1>Typing Game</h1>
+  <main>
+    <section id="game">
+      <time></time>
+      <p></p>
+      <input autofocus />
+    </section>
+    <section id="results">
+      <h2>wpm</h2>
+      <h3 id="wpm"></h3>
+
+      <h2>accuracy</h2>
+      <h3 id="accuracy"></h3>
+
+      <button id="reload">
+        <svg width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747" />
+          <path d="M20 4v5h-5" />
+        </svg>
+      </button>
+    </section>
+  </main>
+</body>
+
+<script type="module">
+  import { words as INITIAL_WORDS } from "./data.js";
+  const $time = document.querySelector("time");
+  const $input = document.querySelector("input");
+  const $p = document.querySelector("p");
+  const $game = document.querySelector("#game");
+  const $results = document.querySelector("#results");
+  const $wpm = $results.querySelector("#wpm");
+  const $accuracy = $results.querySelector("#accuracy");
+  const $button = document.querySelector("#reload");
+
+  let INITIAL_TIME = 20;
+  let score = 0;
+
+  let words = [];
+  let currentTime = 0;
+
+  initGame();
+  initEvents();
+
+  function initGame() {
+    words = INITIAL_WORDS.toSorted(()=> Math.random() - 0.5).slice(0, 40);
+    currentTime = INITIAL_TIME;
+
+    $time.textContent = currentTime;
+    $p.innerHTML = words
+      .map((word, i) => {
+        let letters = word.split("");
+        return `<x-word>
+                ${letters
+                  .map((letter, i) => `<x-letter>${letter}</x-letter>`)
+                  .join("")}
+                </x-word>`;
+      })
+      .join(" ");
+
+    const $firstWord = $p.querySelector("x-word");
+    $firstWord.classList.add("active");
+    $firstWord.querySelector("x-letter").classList.add("active");
+
+    const intervalId = setInterval(() => {
+      currentTime--;
+      $time.textContent = currentTime;
+      if (currentTime === 0) {
+        clearInterval(intervalId);
+        gameOver();
+      }
+    }, 1000);
+  }
+  function initEvents() {
+    document.addEventListener("keydown", () => {
+      $input.focus();
+    });
+    $input.addEventListener("keydown", onKeyDown);
+    $input.addEventListener("keyup", onKeyUp);
+    $button.addEventListener("click", () => {
+      $game.style.display = "flex";
+      $results.style.display = "none";
+      initGame();
+    });
+
+    function onKeyDown(e) {
+      const { key } = e;
+      let $currentWord = $p.querySelector("x-word.active");
+      let $currentLetter = $currentWord.querySelector("x-letter.active");
+
+      if (key == " ") {
+        e.preventDefault();
+        const $nextWord = $currentWord.nextElementSibling;
+        const $nextLetter = $nextWord.querySelector("x-letter");
+          $currentWord.classList.remove("active");
+          $currentLetter.classList.remove("active");
+
+          $nextWord.classList.add("active");
+          $nextLetter.classList.add("active");
+
+          $input.value = "";
+
+          const hasMissedLetters = $currentWord.querySelectorAll('x-letter:not(.correct)').length > 0;
+          const classToAdd = hasMissedLetters ? "marked" : "correct";
+          $currentWord.classList.add(classToAdd);
+        return
+      }
+
+      if(key == "Backspace"){
+        const $prevWord = $currentWord.previousElementSibling;
+        const $prevLetter = $currentLetter.previousElementSibling;
+        if(!$prevLetter && !$prevWord){
+          e.preventDefault();
+          return;
+        }
+        const $wordMarked = $p.querySelector("x-word.marked");
+        if(!$prevLetter && $wordMarked){
+          e.preventDefault()
+          $wordMarked.classList.remove("marked");
+          $wordMarked.classList.add("active");
+          
+          const $letterToGo = $prevWord.querySelector("x-letter:last-child");
+          $currentLetter.classList.remove("active");
+          $letterToGo.classList.add("active");
+          //Debo mapearlo porque el querySelectorAll me devuelve un NodeList y necesito un array
+          $input.value = [...$prevWord.querySelectorAll('x-letter.correct, x-letter.incorrect')]
+            .map($letter =>{
+              return $letter.classList.contains('correct') ? $letter.innerText : '*'
+            })
+            .join("")
+
+        }
+
+      }
+    }
+    function onKeyUp() {
+      let $currentWord = $p.querySelector("x-word.active");
+      let $currentLetter = $currentWord.querySelector("x-letter.active");
+
+      const currentWord = $currentWord.innerText.trim();
+      $input.maxLength = currentWord.length;
+
+      const $allLetters = $currentWord.querySelectorAll("x-letter");
+      $allLetters.forEach(($letter) =>
+        $letter.classList.remove("correct", "incorrect")
+      );
+
+      $input.value.split("").forEach((char, index) => {
+        const $letter = $allLetters[index];
+        const letterToCheck = currentWord[index];
+        const isCorrect = char === letterToCheck;
+        const letterClass = isCorrect ? "correct" : "incorrect";
+        $letter.classList.add(letterClass);
+      });
+
+      $currentLetter.classList.remove("active","is-last");
+      const inputLength = $input.value.length;
+      const $nextActiveLetter = $allLetters[inputLength];
+
+      if($nextActiveLetter){
+        $nextActiveLetter.classList.add("active");
+      } else {
+        $currentLetter.classList.add("active","is-last");
+      }
+    }
+  }
+  function gameOver() {
+    $game.style.display = "none";
+    $results.style.display = "flex";
+
+    const correctLetters = $p.querySelectorAll("x-letter.correct").length;
+    const correctWords = $p.querySelectorAll("x-word.correct").length;
+    const incorrectLetters = $p.querySelectorAll("x-letter.incorrect").length;
+
+    const totalLetters = correctLetters + incorrectLetters;
+    const accuracy = totalLetters > 0 ?
+    (correctLetters / totalLetters) * 100
+    : 0;
+
+    const wpm = correctWords / INITIAL_TIME * 60; //correctWords * 60 / 10;
+    $wpm.textContent = wpm;
+    $accuracy.textContent = `${accuracy.toFixed(2)}%`;
+
+    }
+</script>

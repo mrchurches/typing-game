@@ -1,0 +1,22 @@
+export let words = [
+    "the", "be", "to", "of", "and", "a", "in", "that", "have", "I", "it", "for", "not", "on", "with", "he", 
+    "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her", "she", "or", 
+    "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up", "out", "if", "about", 
+    "who", "get", "which", "go", "me", "when", "make", "can", "like", "time", "no", "just", "him", "know", 
+    "take", "people", "into", "year", "your", "good", "some", "could", "them", "see", "other", "than", "then", 
+    "now", "look", "only", "come", "its", "over", "think", "also", "back", "after", "use", "two", "how", 
+    "our", "work", "first", "well", "way", "even", "new", "want", "because", "any", "these", "give", "day", 
+    "most", "us", "is", "was", "are", "were", "been", "being", "do", "does", "did", "done", "doing", "has", 
+    "have", "had", "having", "will", "would", "shall", "should", "may", "might", "must", "can", "could", 
+    "ought", "need", "dare", "used", "isn't", "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't", 
+    "doesn't", "don't", "didn't", "won't", "wouldn't", "shan't", "shouldn't", "can't", "cannot", "couldn't", 
+    "mustn't", "let's", "that's", "who's", "what's", "here's", "there's", "when's", "where's", "why's", 
+    "how's", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", 
+    "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", 
+    "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", 
+    "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", 
+    "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", 
+    "s", "t", "can", "will", "just", "don", "should", "now", "d", "ll", "m", "o", "re", "ve", "y", "ain", 
+    "aren", "couldn", "didn", "doesn", "hadn", "hasn", "haven", "isn", "ma", "mightn", "mustn", "needn", 
+    "shan", "shouldn", "wasn", "weren", "won", "wouldn"
+]
